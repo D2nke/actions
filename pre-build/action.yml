@@ -17,12 +17,15 @@ runs:
 
     - name: "📋 Verificando variáveis de ambiente obrigatórias"
       shell: bash
+      env:
+        DOCKER_REGISTRY: ${{ vars.DOCKER_REGISTRY }}
+        FLY_APP_NAME: ${{ vars.FLY_APP_NAME }}
       run: |
         set -e
         echo "→ Validando vars obrigatórias..."
 
-        if [[ -z "${{ vars.DOCKER_REGISTRY }}" ]] && \
-           [[ -z "${{ vars.FLY_APP_NAME }}" ]]; then
+        if [[ -z "$DOCKER_REGISTRY" ]] && \
+           [[ -z "$FLY_APP_NAME" ]]; then
           echo "⚠️  Aviso: nem DOCKER_REGISTRY nem FLY_APP_NAME estão definidos"
           echo "   (isso é OK se você não vai fazer deploy)"
         fi
