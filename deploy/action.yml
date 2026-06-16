@@ -1,0 +1,82 @@
+name: Deploy (Fly.io)
+description: Deploy a Docker image to Fly.io, creating the app if it does not exist
+
+inputs:
+  fly_app:
+    description: "Nome do app no Fly.io"
+    required: false
+    default: ""
+  environment:
+    description: "Ambiente: dev | staging | prd"
+    required: true
+  image_name:
+    description: "Imagem Docker completa (ex: docker.io/user/app)"
+    required: true
+  image_tag:
+    description: "Tag da imagem Docker"
+    required: false
+    default: "latest"
+runs:
+  using: composite
+  steps:
+    - name: "🔧 Instalando Fly CLI..."
+      uses: superfly/flyctl-actions/setup-flyctl@master
+
+    - name: "🔍 Verificando conexão com o Fly.io..."
+      shell: bash
+      env:
+        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      run: |
+        echo "→ Verificando conexão com o Fly.io..."
+        flyctl auth whoami
+        echo "✓ Conexão bem sucedida"
+
+    - name: "📋 Criando app se não existir..."
+      id: create-app
+      shell: bash
+      env:
+        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      run: |
+        org_name="${{ vars.FLY_ORG }}"
+        org_name="${org_name,,}"
+
+        name_app="${{ inputs.fly_app || github.event.repository.name }}"
+        name_app="${name_app,,}"
+
+        owner_app="${{ github.repository_owner }}"
+        owner_app="${owner_app,,}"
+
+        name_app="$org_name-${name_app//_/-}-$owner_app"
+        echo "name_app=$name_app" >> $GITHUB_OUTPUT
+
+        echo "Formando nome da aplicação:"
+        echo "name app: $name_app"
+
+        flyctl status --app "$name_app" 2>/dev/null \
+          || flyctl apps create --name "$name_app" --org "${{ vars.FLY_ORG }}"
+
+    - name: "🚀 Deployando no Fly.io..."
+      shell: bash
+      env:
+        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        NAME_APP: ${{ steps.create-app.outputs.name_app }}
+      run: |
+        echo "→ Iniciando deploy..."
+        echo "  App:      $NAME_APP"
+        echo "  Imagem:   ${{ inputs.image_name }}:${{ inputs.image_tag }}"
+        echo "  Ambiente: ${{ inputs.environment }}"
+        flyctl deploy \
+          --app $NAME_APP \
+          --image ${{ inputs.image_name }}:${{ inputs.image_tag }} \
+          --strategy rolling \
+          --ha=false
+        echo "✓ Deploy concluído com sucesso"
+
+    - name: "✓ Deploy finalizado"
+      shell: bash
+      env:
+        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        NAME_APP: ${{ steps.create-app.outputs.name_app }}
+      run: |
+        echo "✓ App '$NAME_APP' rodando em ${{ inputs.environment }}"
+        flyctl status --app $NAME_APP
