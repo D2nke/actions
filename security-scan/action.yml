@@ -37,13 +37,11 @@ runs:
     # ── Snyk ──────────────────────────────────────────────────────────────────
 
     - name: "📦 Setup Node (para Snyk)"
-      if: ${{ inputs.enable_snyk }}
       uses: actions/setup-node@v4
       with:
         node-version: "20"
 
     - name: "🔍 Run Snyk Scan"
-      if: ${{ inputs.enable_snyk }}
       uses: snyk/actions/node@master
       env:
         SNYK_TOKEN: ${{ inputs.snyk_token }}
@@ -54,7 +52,6 @@ runs:
           --json-file-output=snyk-results.json
 
     - name: "📋 Snyk Results Summary"
-      if: ${{ inputs.enable_snyk }}
       shell: bash
       run: |
         if [[ -f "snyk-results.json" ]]; then
@@ -68,7 +65,6 @@ runs:
     # ── SonarQube ─────────────────────────────────────────────────────────────
 
     - name: "📋 List coverage reports"
-      if: ${{ inputs.enable_sonar }}
       shell: bash
       run: |
         echo "→ Procurando relatórios de cobertura..."
@@ -76,7 +72,6 @@ runs:
         echo "✓ Relatórios identificados"
 
     - name: "🔍 SonarQube Scan"
-      if: ${{ inputs.enable_sonar }}
       uses: SonarSource/sonarqube-scan-action@v8.2.0
       env:
         SONAR_TOKEN: ${{ inputs.sonar_token }}
@@ -90,7 +85,6 @@ runs:
           -Dsonar.qualitygate.wait=true
 
     - name: "✓ SonarQube scan concluído"
-      if: ${{ inputs.enable_sonar }}
       shell: bash
       run: |
         echo "✓ Qualidade de código verificada"
@@ -99,7 +93,6 @@ runs:
     # ── Summary ───────────────────────────────────────────────────────────────
 
     - name: "📊 Security Gates Summary"
-      if: always()
       shell: bash
       run: |
         echo "════════════════════════════════════════"
