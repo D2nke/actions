@@ -19,10 +19,10 @@ inputs:
     default: "coverage.xml,**/target/site/jacoco/jacoco.xml"
   snyk_token:
     description: "Snyk API token"
-    required: true
+    default: ${{ secrets.SNYK_TOKEN }}
   sonar_token:
     description: "SonarQube token"
-    required: true
+    default: ${{ secrets.SONAR_TOKEN }}
   sonar_org_key:
     description: "SonarQube organization key"
     required: true
