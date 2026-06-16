@@ -26,7 +26,7 @@ Actions compostas versionadas em um repositório central. Um time atualiza aqui;
 | [deploy](./deploy/) | Deploy de imagem Docker no Fly.io, criando o app automaticamente |
 | [files-update](./files-update/) | Sincroniza arquivos de um repositório fonte para o repositório chamador |
 | [pre-build](./pre-build/) | Valida variáveis de ambiente e estrutura obrigatória do projeto |
-| [release-tag](./release-tag/) | Gera e publica uma git tag semver baseada no número do run |
+| [release-tag](./release-tag/) | Gera e publica uma git tag semver calculada a partir do tipo do último commit (Conventional Commits) |
 | [security-scan](./security-scan/) | Roda Snyk (dependências) e SonarQube (qualidade de código) |
 
 ---

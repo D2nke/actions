@@ -1,5 +1,13 @@
 name: Release Tag
-description: Generate and push a semver git tag based on the run number
+description: Generate and push a semver tag based on the last commit's conventional commit type
+
+outputs:
+  version:
+    description: "New tag created (e.g. v1.2.0)"
+    value: ${{ steps.version.outputs.version }}
+  bump:
+    description: "Bump type applied: major | minor | patch"
+    value: ${{ steps.version.outputs.bump }}
 
 runs:
   using: composite
@@ -8,23 +16,63 @@ runs:
       with:
         fetch-depth: 0
 
-    - name: "📝 Gerando versão..."
+    - name: "📝 Calculando próxima versão..."
       id: version
       shell: bash
       run: |
-        VERSION="v0.0.${{ github.run_number }}"
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-        echo "→ Version: $VERSION"
+        # Última tag semver (fallback v0.0.0 se não existir nenhuma)
+        LAST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+        if [ -z "$LAST_TAG" ]; then
+          LAST_TAG="v0.1.0"
+          echo "→ Nenhuma tag encontrada, iniciando em $LAST_TAG"
+        else
+          echo "→ Última tag: $LAST_TAG"
+        fi
+
+        MAJOR=$(echo "$LAST_TAG" | sed 's/v//' | cut -d. -f1)
+        MINOR=$(echo "$LAST_TAG" | sed 's/v//' | cut -d. -f2)
+        PATCH=$(echo "$LAST_TAG" | sed 's/v//' | cut -d. -f3)
+
+        # Mensagem e corpo do último commit
+        COMMIT_SUBJECT=$(git log -1 --pretty=%s)
+        COMMIT_BODY=$(git log -1 --pretty=%b)
+        echo "→ Commit: $COMMIT_SUBJECT"
+
+        # Determina o tipo de bump:
+        #   BREAKING CHANGE no corpo ou ! após o tipo → major
+        #   feat → minor
+        #   fix, perf, refactor, revert, docs, chore, test, style, ci, build → patch
+        if echo "$COMMIT_SUBJECT" | grep -qE '^[a-z]+(\([^)]+\))?!:' || \
+           echo "$COMMIT_BODY"    | grep -q 'BREAKING CHANGE'; then
+          MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
+          BUMP="major"
+        elif echo "$COMMIT_SUBJECT" | grep -qE '^feat(\([^)]+\))?:'; then
+          MINOR=$((MINOR + 1)); PATCH=0
+          BUMP="minor"
+        else
+          PATCH=$((PATCH + 1))
+          BUMP="patch"
+        fi
+
+        VERSION="v$MAJOR.$MINOR.$PATCH"
+        echo "→ Bump: $BUMP → $LAST_TAG → $VERSION"
+
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "bump=$BUMP"       >> "$GITHUB_OUTPUT"
 
     - name: "🏷️ Criando git tag..."
       shell: bash
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
-        git tag -a ${{ steps.version.outputs.version }} -m "Release ${{ steps.version.outputs.version }}"
-        git push origin ${{ steps.version.outputs.version }}
+        git tag -a "${{ steps.version.outputs.version }}" \
+          -m "Release ${{ steps.version.outputs.version }}"
+        git push origin "${{ steps.version.outputs.version }}"
         echo "✓ Tag ${{ steps.version.outputs.version }} criada e enviada"
 
     - name: "✓ Release concluído"
       shell: bash
-      run: echo "✓ Release ${{ steps.version.outputs.version }} finalizado"
+      run: |
+        echo "✓ Release ${{ steps.version.outputs.version }} finalizado"
+        echo "  Bump:    ${{ steps.version.outputs.bump }}"
+        echo "  Commit:  $(git log -1 --pretty=%s)"
