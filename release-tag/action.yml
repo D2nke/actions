@@ -1,0 +1,30 @@
+name: Release Tag
+description: Generate and push a semver git tag based on the run number
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: "📝 Gerando versão..."
+      id: version
+      shell: bash
+      run: |
+        VERSION="v0.0.${{ github.run_number }}"
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "→ Version: $VERSION"
+
+    - name: "🏷️ Criando git tag..."
+      shell: bash
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git tag -a ${{ steps.version.outputs.version }} -m "Release ${{ steps.version.outputs.version }}"
+        git push origin ${{ steps.version.outputs.version }}
+        echo "✓ Tag ${{ steps.version.outputs.version }} criada e enviada"
+
+    - name: "✓ Release concluído"
+      shell: bash
+      run: echo "✓ Release ${{ steps.version.outputs.version }} finalizado"
