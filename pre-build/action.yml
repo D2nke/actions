@@ -1,0 +1,56 @@
+name: Pre-Build Validation
+description: Validate required environment variables and project structure before build
+
+runs:
+  using: composite
+  steps:
+    - name: "📋 Display deployment context"
+      shell: bash
+      run: |
+        echo "🎯 Sandbox Deployment Started"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "Trigger: ${{ github.event_name }}"
+        echo "Ref: ${{ github.ref }}"
+        echo "SHA: ${{ github.sha }}"
+        echo "Environment: dev"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+    - name: "📋 Verificando variáveis de ambiente obrigatórias"
+      shell: bash
+      run: |
+        set -e
+        echo "→ Validando vars obrigatórias..."
+
+        if [[ -z "${{ vars.DOCKER_REGISTRY }}" ]] && \
+           [[ -z "${{ vars.FLY_APP_NAME }}" ]]; then
+          echo "⚠️  Aviso: nem DOCKER_REGISTRY nem FLY_APP_NAME estão definidos"
+          echo "   (isso é OK se você não vai fazer deploy)"
+        fi
+
+        echo "✓ Variáveis verificadas"
+
+    - name: "📁 Verificando estrutura obrigatória do projeto"
+      shell: bash
+      run: |
+        echo "→ Validando arquivos essenciais..."
+
+        if [[ ! -f "Dockerfile" ]]; then
+          echo "❌ Erro: Dockerfile não encontrado na raiz"
+          exit 1
+        fi
+        echo "✓ Dockerfile encontrado"
+
+        if [[ ! -f "package.json" ]] && \
+           [[ ! -f "pom.xml" ]] && \
+           [[ ! -f "setup.py" ]]; then
+          echo "❌ Erro: nenhum arquivo de build encontrado"
+          echo "   Esperado: package.json (Node), pom.xml (Java), ou setup.py (Python)"
+          exit 1
+        fi
+        echo "✓ Arquivo de build encontrado"
+
+    - name: "✓ Pre-build validação concluída"
+      shell: bash
+      run: |
+        echo "✓ Todas as verificações passaram"
+        echo "→ Projeto pronto para CI/CD"
