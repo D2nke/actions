@@ -5,34 +5,29 @@ description: Run Snyk dependency scan and SonarQube quality gate
 inputs:
   sonar_project_key:
     description: "SonarQube project key"
-    required: false
-    default: ""
+    required: true
   enable_snyk:
     description: "Enable Snyk dependency scan (true/false)"
-    required: false
-    default: "true"
+    type: boolean
+    default: true
   enable_sonar:
     description: "Enable SonarQube quality gate (true/false)"
-    required: false
-    default: "true"
+    type: boolean
+    default: true
   coverage_report_paths:
     description: "Paths to coverage reports (comma-separated)"
-    required: false
     default: "coverage.xml,**/target/site/jacoco/jacoco.xml"
   snyk_token:
     description: "Snyk API token"
-    required: false
-    default: ""
+    required: true
   sonar_token:
     description: "SonarQube token"
-    required: false
-    default: ""
+    required: true
   sonar_org_key:
     description: "SonarQube organization key"
-    required: false
-    default: ""
+    required: true
 runs:
-  using: composite
+  runs-on: ubuntu-latest
   steps:
     - name: Checkout
       uses: actions/checkout@v4
