@@ -1,4 +1,4 @@
-# my_workflows
+# Actions
 
 Composite actions reutilizáveis para pipelines CI/CD — build, segurança, deploy e release em módulos independentes prontos para qualquer repositório.
 
@@ -79,8 +79,8 @@ As actions leem secrets e vars diretamente do repositório chamador — não é 
 
 ## Versionamento
 
-Use `@main` para sempre acompanhar a versão mais recente, ou fixe em uma tag específica para mais controle:
+Use `@master` para sempre acompanhar a versão mais recente, ou fixe em uma tag específica para mais controle:
 
 ```yaml
-uses: D2nke/my_workflows/actions/build-docker@v1.0.0
+uses: D2nke/my_workflows/actions/build-docker@latest
 ```
