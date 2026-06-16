@@ -37,14 +37,13 @@ runs:
     # ── Snyk ──────────────────────────────────────────────────────────────────
 
     - name: "📦 Setup Node (para Snyk)"
-      if: inputs.enable_snyk == 'true'
+      if: inputs.enable_snyk == true
       uses: actions/setup-node@v4
       with:
         node-version: "20"
-      continue-on-error: true
 
     - name: "🔍 Run Snyk Scan"
-      if: inputs.enable_snyk == 'true'
+      if: inputs.enable_snyk == true
       uses: snyk/actions/node@master
       env:
         SNYK_TOKEN: ${{ inputs.snyk_token }}
@@ -53,10 +52,9 @@ runs:
           --severity-threshold=high
           --json
           --json-file-output=snyk-results.json
-      continue-on-error: true
 
     - name: "📋 Snyk Results Summary"
-      if: inputs.enable_snyk == 'true'
+      if: inputs.enable_snyk == true
       shell: bash
       run: |
         if [[ -f "snyk-results.json" ]]; then
@@ -66,12 +64,11 @@ runs:
         else
           echo "✓ No vulnerabilities found"
         fi
-      continue-on-error: true
 
     # ── SonarQube ─────────────────────────────────────────────────────────────
 
     - name: "📋 List coverage reports"
-      if: inputs.enable_sonar == 'true'
+      if: inputs.enable_sonar == true
       shell: bash
       run: |
         echo "→ Procurando relatórios de cobertura..."
@@ -79,7 +76,7 @@ runs:
         echo "✓ Relatórios identificados"
 
     - name: "🔍 SonarQube Scan"
-      if: inputs.enable_sonar == 'true'
+      if: inputs.enable_sonar == true
       uses: SonarSource/sonarqube-scan-action@v8.2.0
       env:
         SONAR_TOKEN: ${{ inputs.sonar_token }}
@@ -93,12 +90,11 @@ runs:
           -Dsonar.qualitygate.wait=true
 
     - name: "✓ SonarQube scan concluído"
-      if: inputs.enable_sonar == 'true'
+      if: inputs.enable_sonar == true
       shell: bash
       run: |
         echo "✓ Qualidade de código verificada"
         echo "→ Verifique em: https://sonarcloud.io"
-      continue-on-error: true
 
     # ── Summary ───────────────────────────────────────────────────────────────
 

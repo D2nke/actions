@@ -7,7 +7,7 @@ inputs:
     required: true
   dockerfile:
     description: "Path to Dockerfile"
-    default: "Dockerfile"
+    default: "./Dockerfile"
   context:
     description: "Docker build context"
     default: "."
