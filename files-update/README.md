@@ -11,11 +11,12 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: D2nke/my_workflows/actions/files-update@main
+      - uses: D2nke/actions/files-update@main
         with:
-          source-repo: D2nke/my_workflows
-          source-dir: actions/build-docker
+          source-repo: D2nke/actions
+          source-dir: build-docker
           target-dir: .github/actions/build-docker
+          gh_pat: ${{ secrets.GH_PAT }}
 ```
 
 ## Inputs
@@ -24,14 +25,9 @@ jobs:
 |-------|-------------|--------|-----------|
 | `source-repo` | sim | — | Repositório fonte no formato `org/repo` |
 | `source-dir` | sim | — | Diretório dentro do repositório fonte |
+| `gh_pat` | sim | — | Personal Access Token com permissão de escrita no repositório chamador |
 | `target-dir` | não | `.github/workflows` | Diretório de destino no repositório chamador |
 | `dry-run` | não | `false` | Se `true`, executa sem fazer commit |
-
-## Secrets necessários no repositório
-
-| Secret | Descrição |
-|--------|-----------|
-| `GH_PAT` | Personal Access Token com permissão de escrita no repositório chamador |
 
 ## Permissões necessárias no job
 

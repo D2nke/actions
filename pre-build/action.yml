@@ -1,6 +1,16 @@
 name: Pre-Build Validation
 description: Validate required environment variables and project structure before build
 
+inputs:
+  docker_registry:
+    description: "Docker registry URL (optional)"
+    required: false
+    default: ""
+  fly_app_name:
+    description: "Fly.io app name (optional)"
+    required: false
+    default: ""
+
 runs:
   using: composite
   steps:
@@ -18,8 +28,8 @@ runs:
     - name: "📋 Verificando variáveis de ambiente obrigatórias"
       shell: bash
       env:
-        DOCKER_REGISTRY: ${{ vars.DOCKER_REGISTRY }}
-        FLY_APP_NAME: ${{ vars.FLY_APP_NAME }}
+        DOCKER_REGISTRY: ${{ inputs.docker_registry }}
+        FLY_APP_NAME: ${{ inputs.fly_app_name }}
       run: |
         set -e
         echo "→ Validando vars obrigatórias..."

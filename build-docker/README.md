@@ -5,9 +5,13 @@ Build e push de imagem Docker para GHCR e Docker Hub com layer caching via GitHu
 ## Uso
 
 ```yaml
-- uses: D2nke/my_workflows/actions/build-docker@main
+- uses: D2nke/actions/build-docker@main
   with:
     image_name: ghcr.io/${{ github.repository_owner }}/meu-app
+    ghcr_username: ${{ vars.GHCR_USERNAME }}
+    ghcr_password: ${{ secrets.GHCR_PASSWORD }}
+    docker_username: ${{ vars.DOCKER_USERNAME }}
+    docker_password: ${{ secrets.DOCKER_PASSWORD }}
 ```
 
 ## Inputs
@@ -15,6 +19,10 @@ Build e push de imagem Docker para GHCR e Docker Hub com layer caching via GitHu
 | Input | Obrigatório | Padrão | Descrição |
 |-------|-------------|--------|-----------|
 | `image_name` | sim | — | Nome completo da imagem (ex: `ghcr.io/org/app`) |
+| `ghcr_username` | sim | — | Usuário para login no GHCR |
+| `ghcr_password` | sim | — | Token para autenticação no GHCR |
+| `docker_username` | sim | — | Usuário para login no Docker Hub |
+| `docker_password` | sim | — | Token para autenticação no Docker Hub |
 | `dockerfile` | não | `Dockerfile` | Caminho para o Dockerfile |
 | `context` | não | `.` | Contexto do build Docker |
 | `tag` | não | `github.sha` | Tag da imagem; usa o SHA do commit se omitido |
@@ -24,20 +32,6 @@ Build e push de imagem Docker para GHCR e Docker Hub com layer caching via GitHu
 | Output | Descrição |
 |--------|-----------|
 | `image-uri` | URI completa da imagem com tag |
-
-## Secrets necessários no repositório
-
-| Secret | Descrição |
-|--------|-----------|
-| `DOCKER_PASSWORD` | Token para autenticação no Docker Hub |
-| `GHCR_PASSWORD` | Token para autenticação no GHCR |
-
-## Vars necessárias no repositório
-
-| Var | Descrição |
-|-----|-----------|
-| `DOCKER_USERNAME` | Usuário para login no Docker Hub |
-| `GHCR_USERNAME` | Usuário para login no GHCR |
 
 ## O que faz
 

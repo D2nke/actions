@@ -5,25 +5,26 @@ Valida variáveis de ambiente e estrutura obrigatória do projeto antes de inici
 ## Uso
 
 ```yaml
-- uses: D2nke/my_workflows/actions/pre-build@main
+- uses: D2nke/actions/pre-build@main
+  with:
+    docker_registry: ${{ vars.DOCKER_REGISTRY }}   # opcional
+    fly_app_name: ${{ vars.FLY_APP_NAME }}         # opcional
 ```
 
-Não requer inputs, secrets nem vars.
+## Inputs
+
+| Input | Obrigatório | Padrão | Descrição |
+|-------|-------------|--------|-----------|
+| `docker_registry` | não | — | Registry de destino (apenas verificada) |
+| `fly_app_name` | não | — | Nome do app no Fly.io (apenas verificada) |
 
 ## O que valida
 
 | Verificação | Comportamento em falha |
 |-------------|----------------------|
-| `DOCKER_REGISTRY` ou `FLY_APP_NAME` definido | Aviso (não bloqueia) |
+| `docker_registry` ou `fly_app_name` definido | Aviso (não bloqueia) |
 | `Dockerfile` presente na raiz | Erro — interrompe o pipeline |
 | `package.json`, `pom.xml` ou `setup.py` presente | Erro — interrompe o pipeline |
-
-## Vars lidas no repositório (opcionais)
-
-| Var | Descrição |
-|-----|-----------|
-| `DOCKER_REGISTRY` | Registry de destino (apenas verificada) |
-| `FLY_APP_NAME` | Nome do app no Fly.io (apenas verificada) |
 
 ## O que faz
 

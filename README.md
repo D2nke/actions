@@ -33,7 +33,7 @@ Actions compostas versionadas em um repositório central. Um time atualiza aqui;
 
 ## Como usar
 
-Referencie qualquer action diretamente em um step do seu workflow:
+Referencie qualquer action diretamente em um step do seu workflow passando credenciais como inputs:
 
 ```yaml
 jobs:
@@ -44,43 +44,56 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: D2nke/my_workflows/actions/pre-build@main
+      - uses: D2nke/actions/pre-build@main
+        with:
+          docker_registry: ${{ vars.DOCKER_REGISTRY }}
+          fly_app_name: ${{ vars.FLY_APP_NAME }}
 
-      - uses: D2nke/my_workflows/actions/build-docker@main
+      - uses: D2nke/actions/build-docker@main
         with:
           image_name: ghcr.io/${{ github.repository_owner }}/meu-app
+          ghcr_username: ${{ vars.GHCR_USERNAME }}
+          ghcr_password: ${{ secrets.GHCR_PASSWORD }}
+          docker_username: ${{ vars.DOCKER_USERNAME }}
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - uses: D2nke/my_workflows/actions/security-scan@main
+      - uses: D2nke/actions/security-scan@main
+        with:
+          snyk_token: ${{ secrets.SNYK_TOKEN }}
+          sonar_token: ${{ secrets.SONAR_TOKEN }}
+          sonar_org_key: ${{ vars.SONAR_ORG_KEY }}
 
-      - uses: D2nke/my_workflows/actions/deploy@main
+      - uses: D2nke/actions/deploy@main
         with:
           environment: dev
           image_name: ghcr.io/${{ github.repository_owner }}/meu-app
+          fly_api_token: ${{ secrets.FLY_API_TOKEN }}
+          fly_org: ${{ vars.FLY_ORG }}
 
-      - uses: D2nke/my_workflows/actions/release-tag@main
+      - uses: D2nke/actions/release-tag@main
 ```
 
-## Secrets e vars
+## Inputs de credenciais por action
 
-As actions leem secrets e vars diretamente do repositório chamador — não é necessário passá-los como inputs. Configure-os uma vez no repositório e todas as actions os encontrarão automaticamente.
+Cada action recebe suas credenciais explicitamente via `with:`. Os secrets e vars continuam configurados no repositório chamador — você só os passa como inputs.
 
-| Secret / Var | Usada em |
-|--------------|----------|
-| `secrets.DOCKER_PASSWORD` | build-docker |
-| `secrets.GHCR_PASSWORD` | build-docker |
-| `secrets.FLY_API_TOKEN` | deploy |
-| `secrets.GH_PAT` | files-update |
-| `secrets.SNYK_TOKEN` | security-scan |
-| `secrets.SONAR_TOKEN` | security-scan |
-| `vars.DOCKER_USERNAME` | build-docker |
-| `vars.GHCR_USERNAME` | build-docker |
-| `vars.FLY_ORG` | deploy |
-| `vars.SONAR_ORG_KEY` | security-scan |
+| Input | Action | Descrição |
+|-------|--------|-----------|
+| `ghcr_username` | build-docker | Usuário para login no GHCR |
+| `ghcr_password` | build-docker | Token para autenticação no GHCR |
+| `docker_username` | build-docker | Usuário para login no Docker Hub |
+| `docker_password` | build-docker | Token para autenticação no Docker Hub |
+| `fly_api_token` | deploy | Token de API do Fly.io |
+| `fly_org` | deploy | Nome da organização no Fly.io |
+| `gh_pat` | files-update | Personal Access Token do GitHub |
+| `snyk_token` | security-scan | Token de autenticação do Snyk |
+| `sonar_token` | security-scan | Token do SonarQube/SonarCloud |
+| `sonar_org_key` | security-scan | Chave da organização no SonarCloud |
 
 ## Versionamento
 
 Use `@master` para sempre acompanhar a versão mais recente, ou fixe em uma tag específica para mais controle:
 
 ```yaml
-uses: D2nke/my_workflows/actions/build-docker@latest
+uses: D2nke/actions/build-docker@v1.2.0
 ```

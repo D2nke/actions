@@ -5,30 +5,24 @@ Executa Snyk (scan de dependências) e SonarQube (qualidade de código) em sequ�
 ## Uso
 
 ```yaml
-- uses: D2nke/my_workflows/actions/security-scan@main
+- uses: D2nke/actions/security-scan@main
+  with:
+    snyk_token: ${{ secrets.SNYK_TOKEN }}
+    sonar_token: ${{ secrets.SONAR_TOKEN }}
+    sonar_org_key: ${{ vars.SONAR_ORG_KEY }}
 ```
 
 ## Inputs
 
 | Input | Obrigatório | Padrão | Descrição |
 |-------|-------------|--------|-----------|
+| `snyk_token` | não | — | Token de autenticação do Snyk (necessário se `enable_snyk: true`) |
+| `sonar_token` | não | — | Token de autenticação do SonarQube/SonarCloud (necessário se `enable_sonar: true`) |
+| `sonar_org_key` | não | — | Chave da organização no SonarCloud (necessário se `enable_sonar: true`) |
 | `enable_snyk` | não | `true` | Habilita o scan de dependências com Snyk |
 | `enable_sonar` | não | `true` | Habilita a análise de qualidade com SonarQube |
 | `sonar_project_key` | não | `{owner}-{repo}` | Project key no SonarQube; gerado automaticamente se omitido |
 | `coverage_report_paths` | não | `coverage.xml,**/target/site/jacoco/jacoco.xml` | Caminhos dos relatórios de cobertura |
-
-## Secrets necessários no repositório
-
-| Secret | Descrição |
-|--------|-----------|
-| `SNYK_TOKEN` | Token de autenticação do Snyk |
-| `SONAR_TOKEN` | Token de autenticação do SonarQube/SonarCloud |
-
-## Vars necessárias no repositório
-
-| Var | Descrição |
-|-----|-----------|
-| `SONAR_ORG_KEY` | Chave da organização no SonarCloud |
 
 ## O que faz
 

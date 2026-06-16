@@ -17,6 +17,9 @@ inputs:
     description: "Do not make actual changes (dry-run mode)"
     required: false
     default: "false"
+  gh_pat:
+    description: "GitHub Personal Access Token"
+    required: true
 runs:
   using: composite
   steps:
@@ -25,13 +28,13 @@ runs:
       with:
         fetch-depth: 0
         path: my_project
-        token: ${{ secrets.GH_PAT }}
+        token: ${{ inputs.gh_pat }}
 
     - name: "📥 Checkout source repo (temporário)"
       uses: actions/checkout@v4
       with:
         repository: ${{ inputs.source-repo }}
-        token: ${{ secrets.GH_PAT }}
+        token: ${{ inputs.gh_pat }}
         path: my_workflows
 
     - name: "📁 Configurar git"

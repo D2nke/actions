@@ -17,6 +17,18 @@ inputs:
     description: "Image tag (defaults to github.sha)"
     required: false
     default: ""
+  ghcr_username:
+    description: "GHCR username"
+    required: true
+  ghcr_password:
+    description: "GHCR password / token"
+    required: true
+  docker_username:
+    description: "Docker Hub username"
+    required: true
+  docker_password:
+    description: "Docker Hub password / token"
+    required: true
 outputs:
   image-uri:
     description: "Full image URI with tag"
@@ -30,7 +42,7 @@ runs:
       shell: bash
       run: |
         TAG="${{ inputs.tag }}"
-        USERNAME=${{ vars.GHCR_USERNAME }}
+        USERNAME=${{ inputs.ghcr_username }}
         NAME_REPOSITORY=${{ github.event.repository.name }}
 
         if [ -z "$TAG" ]; then
@@ -57,15 +69,15 @@ runs:
     - name: "🔑 Login no container registry (Docker)"
       uses: docker/login-action@v3
       with:
-        username: ${{ vars.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        username: ${{ inputs.docker_username }}
+        password: ${{ inputs.docker_password }}
 
     - name: "🔑 Login no container registry (GHCR)"
       uses: docker/login-action@v3
       with:
         registry: ghcr.io
-        username: ${{ vars.GHCR_USERNAME }}
-        password: ${{ secrets.GHCR_PASSWORD }}
+        username: ${{ inputs.ghcr_username }}
+        password: ${{ inputs.ghcr_password }}
 
     - name: "📝 Metadados da imagem"
       id: meta

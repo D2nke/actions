@@ -5,11 +5,13 @@ Deploy de imagem Docker no Fly.io. Cria o app automaticamente se ele ainda não 
 ## Uso
 
 ```yaml
-- uses: D2nke/my_workflows/actions/deploy@main
+- uses: D2nke/actions/deploy@main
   with:
     environment: dev
     image_name: ghcr.io/${{ github.repository_owner }}/meu-app
     image_tag: ${{ github.sha }}
+    fly_api_token: ${{ secrets.FLY_API_TOKEN }}
+    fly_org: ${{ vars.FLY_ORG }}
 ```
 
 ## Inputs
@@ -18,20 +20,10 @@ Deploy de imagem Docker no Fly.io. Cria o app automaticamente se ele ainda não 
 |-------|-------------|--------|-----------|
 | `environment` | sim | — | Ambiente alvo: `dev`, `staging` ou `prd` |
 | `image_name` | sim | — | Imagem Docker completa (ex: `ghcr.io/user/app`) |
+| `fly_api_token` | sim | — | Token de API do Fly.io |
+| `fly_org` | sim | — | Nome da organização no Fly.io |
 | `fly_app` | não | nome do repositório | Nome do app no Fly.io |
 | `image_tag` | não | `latest` | Tag da imagem Docker |
-
-## Secrets necessários no repositório
-
-| Secret | Descrição |
-|--------|-----------|
-| `FLY_API_TOKEN` | Token de API do Fly.io |
-
-## Vars necessárias no repositório
-
-| Var | Descrição |
-|-----|-----------|
-| `FLY_ORG` | Nome da organização no Fly.io |
 
 ## O que faz
 

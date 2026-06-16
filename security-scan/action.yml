@@ -19,6 +19,18 @@ inputs:
     description: "Paths to coverage reports (comma-separated)"
     required: false
     default: "coverage.xml,**/target/site/jacoco/jacoco.xml"
+  snyk_token:
+    description: "Snyk API token"
+    required: false
+    default: ""
+  sonar_token:
+    description: "SonarQube token"
+    required: false
+    default: ""
+  sonar_org_key:
+    description: "SonarQube organization key"
+    required: false
+    default: ""
 runs:
   using: composite
   steps:
@@ -40,7 +52,7 @@ runs:
       if: inputs.enable_snyk == 'true'
       uses: snyk/actions/node@master
       env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        SNYK_TOKEN: ${{ inputs.snyk_token }}
       with:
         args: >
           --severity-threshold=high
@@ -75,12 +87,12 @@ runs:
       if: inputs.enable_sonar == 'true'
       uses: SonarSource/sonarqube-scan-action@v8.2.0
       env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_TOKEN: ${{ inputs.sonar_token }}
       with:
         args: >
           -Dsonar.projectKey=${{ inputs.sonar_project_key || format('{0}-{1}', github.repository_owner, github.event.repository.name) }}
           -Dsonar.sources=.
-          -Dsonar.organization=${{ vars.SONAR_ORG_KEY }}
+          -Dsonar.organization=${{ inputs.sonar_org_key }}
           -Dsonar.coverage.exclusions=**/.github/**,**/node_modules/**,**/*.test.js,**/*.test.py,**/tests/**,Dockerfile
           -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
           -Dsonar.qualitygate.wait=true
