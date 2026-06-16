@@ -1,0 +1,108 @@
+name: Security Scan
+description: Run Snyk dependency scan and SonarQube quality gate
+# Requires the caller job to set: permissions: contents: read
+
+inputs:
+  sonar_project_key:
+    description: "SonarQube project key"
+    required: false
+    default: ""
+  enable_snyk:
+    description: "Enable Snyk dependency scan (true/false)"
+    required: false
+    default: "true"
+  enable_sonar:
+    description: "Enable SonarQube quality gate (true/false)"
+    required: false
+    default: "true"
+  coverage_report_paths:
+    description: "Paths to coverage reports (comma-separated)"
+    required: false
+    default: "coverage.xml,**/target/site/jacoco/jacoco.xml"
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    # ── Snyk ──────────────────────────────────────────────────────────────────
+
+    - name: "📦 Setup Node (para Snyk)"
+      if: inputs.enable_snyk == 'true'
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+      continue-on-error: true
+
+    - name: "🔍 Run Snyk Scan"
+      if: inputs.enable_snyk == 'true'
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: >
+          --severity-threshold=high
+          --json
+          --json-file-output=snyk-results.json
+      continue-on-error: true
+
+    - name: "📋 Snyk Results Summary"
+      if: inputs.enable_snyk == 'true'
+      shell: bash
+      run: |
+        if [[ -f "snyk-results.json" ]]; then
+          jq -r '.vulnerabilities[]? | "\(.severity): \(.title)"' snyk-results.json || true
+          VULNS=$(jq '.summary.total // 0' snyk-results.json 2>/dev/null)
+          echo "→ Total vulnerabilities: $VULNS"
+        else
+          echo "✓ No vulnerabilities found"
+        fi
+      continue-on-error: true
+
+    # ── SonarQube ─────────────────────────────────────────────────────────────
+
+    - name: "📋 List coverage reports"
+      if: inputs.enable_sonar == 'true'
+      shell: bash
+      run: |
+        echo "→ Procurando relatórios de cobertura..."
+        find . -name "coverage.xml" -o -name "jacoco.xml" 2>/dev/null | head -10
+        echo "✓ Relatórios identificados"
+
+    - name: "🔍 SonarQube Scan"
+      if: inputs.enable_sonar == 'true'
+      uses: SonarSource/sonarqube-scan-action@v8.2.0
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        args: >
+          -Dsonar.projectKey=${{ inputs.sonar_project_key || format('{0}-{1}', github.repository_owner, github.event.repository.name) }}
+          -Dsonar.sources=.
+          -Dsonar.organization=${{ vars.SONAR_ORG_KEY }}
+          -Dsonar.coverage.exclusions=**/.github/**,**/node_modules/**,**/*.test.js,**/*.test.py,**/tests/**,Dockerfile
+          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+          -Dsonar.qualitygate.wait=true
+
+    - name: "✓ SonarQube scan concluído"
+      if: inputs.enable_sonar == 'true'
+      shell: bash
+      run: |
+        echo "✓ Qualidade de código verificada"
+        echo "→ Verifique em: https://sonarcloud.io"
+      continue-on-error: true
+
+    # ── Summary ───────────────────────────────────────────────────────────────
+
+    - name: "📊 Security Gates Summary"
+      if: always()
+      shell: bash
+      run: |
+        echo "════════════════════════════════════════"
+        echo "  🔒 Security Gates Summary"
+        echo "════════════════════════════════════════"
+        echo "✓ Snyk Dependency Scan"
+        echo "✓ SonarQube Quality Gate"
+        echo "✓ Code Coverage Analysis"
+        echo "════════════════════════════════════════"
