@@ -2,30 +2,33 @@ name: Security Scan
 description: Run Snyk dependency scan and SonarQube quality gate
 # Requires the caller job to set: permissions: contents: read
 
-inputs:
-  sonar_project_key:
-    description: "SonarQube project key"
-    required: true
-  enable_snyk:
-    description: "Enable Snyk dependency scan (true/false)"
-    type: boolean
-    default: true
-  enable_sonar:
-    description: "Enable SonarQube quality gate (true/false)"
-    type: boolean
-    default: true
-  coverage_report_paths:
-    description: "Paths to coverage reports (comma-separated)"
-    default: "coverage.xml,**/target/site/jacoco/jacoco.xml"
-  snyk_token:
-    description: "Snyk API token"
-    default: ${{ secrets.SNYK_TOKEN }}
-  sonar_token:
-    description: "SonarQube token"
-    default: ${{ secrets.SONAR_TOKEN }}
-  sonar_org_key:
-    description: "SonarQube organization key"
-    required: true
+on:
+  workflow_call:
+    inputs:
+      sonar_project_key:
+        description: "SonarQube project key"
+        required: true
+      enable_snyk:
+        description: "Enable Snyk dependency scan (true/false)"
+        type: boolean
+        default: true
+      enable_sonar:
+        description: "Enable SonarQube quality gate (true/false)"
+        type: boolean
+        default: true
+      coverage_report_paths:
+        description: "Paths to coverage reports (comma-separated)"
+        default: "coverage.xml,**/target/site/jacoco/jacoco.xml"
+      snyk_token:
+        description: "Snyk API token"
+        default: ${{ secrets.SNYK_TOKEN }}
+      sonar_token:
+        description: "SonarQube token"
+        default: ${{ secrets.SONAR_TOKEN }}
+      sonar_org_key:
+        description: "SonarQube organization key"
+        required: true
+        
 runs:
   runs-on: ubuntu-latest
   steps:
