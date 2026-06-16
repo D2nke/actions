@@ -28,8 +28,8 @@ on:
       sonar_org_key:
         description: "SonarQube organization key"
         required: true
-        
-runs:
+
+jobs:
   runs-on: ubuntu-latest
   steps:
     - name: Checkout
